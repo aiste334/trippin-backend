@@ -1,6 +1,7 @@
 const express = require("express")
 const dotenv = require("dotenv")
 const { MongoClient } = require("mongodb")
+const bodyParser = require("body-parser")
 const app = express()
 const port = 3009
 
@@ -11,7 +12,9 @@ async function getDestinations(client) {
   const database = client.db("trippin")
   const destinations = database.collection("destinations")
 
-  return destinations.find()
+  const result = await destinations.find({}).toArray()
+
+  return JSON.stringify(result)
 }
 
 async function createDestination(body) {
@@ -21,21 +24,14 @@ async function createDestination(body) {
 
     return await destinations.insertOne(body)
   } catch (err) {
+    console.log(err)
     throw new Error("Failed to create database")
   }
 }
 
-async function connect() {
-  try {
-    await client.connect()
-  } catch (e) {
-    console.error(e)
-  } finally {
-    await client.close()
-  }
-}
+app.use(bodyParser.json())
 
-app.get("/", async (req, res) => {
+app.get("/destinations", async (req, res) => {
   const destinations = await getDestinations(client)
 
   res.status(200).send(destinations)
@@ -52,7 +48,5 @@ app.post("/destination", async (req, res) => {
 })
 
 app.listen(port, () => {
-  connect().catch(console.error)
-
   console.log(`Listening on port ${port}`)
 })
