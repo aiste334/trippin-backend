@@ -34,7 +34,7 @@ async function createDestination(body) {
 
 app.use(bodyParser.json())
 
-app.get("/destinations", async (req, res) => {
+app.get("/", async (req, res) => {
   const destinations = await getDestinations(client)
 
   res.set("Access-Control-Allow-Origin", "*")
