@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 const { MongoClient } = require("mongodb")
 const bodyParser = require("body-parser")
 const app = express()
+var cors = require("cors")
 const port = 3009
 
 const uri = "mongodb://127.0.0.1:27017"
@@ -30,20 +31,22 @@ async function createDestination(body) {
 }
 
 app.use(bodyParser.json())
+app.use(cors())
 
 app.get("/destinations", async (req, res) => {
   const destinations = await getDestinations(client)
 
-  res.set("Access-Control-Allow-Origin", "*")
   res.status(200).send(destinations)
 })
 
 app.post("/destination", async (req, res) => {
   try {
+    console.log(req.body)
     const result = await createDestination(req.body)
 
     res.status(201).send(result)
   } catch (err) {
+    console.log(err)
     res.status(500).send("Failed to create destination")
   }
 })
