@@ -3,8 +3,10 @@ const dotenv = require("dotenv")
 const { MongoClient } = require("mongodb")
 const bodyParser = require("body-parser")
 const app = express()
-var cors = require("cors")
+const cors = require("cors") // Import the cors middleware
 const port = 3009
+
+app.use(cors()) // Use the cors middleware to enable CORS for all routes
 
 const uri = "mongodb://127.0.0.1:27017"
 const client = new MongoClient(uri)
@@ -33,7 +35,7 @@ async function createDestination(body) {
 app.use(bodyParser.json())
 app.use(cors())
 
-app.get("/destinations", async (req, res) => {
+app.get("/", async (req, res) => {
   const destinations = await getDestinations(client)
 
   res.status(200).send(destinations)
