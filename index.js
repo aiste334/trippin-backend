@@ -35,7 +35,7 @@ async function createDestination(body) {
 app.use(bodyParser.json())
 app.use(cors())
 
-app.get("/", async (req, res) => {
+app.get("/destinations", async (req, res) => {
   const destinations = await getDestinations(client)
 
   res.status(200).send(destinations)
