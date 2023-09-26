@@ -1,10 +1,9 @@
 const Destination = require("./schemas/destination")
 
 const express = require("express")
-const dotenv = require("dotenv")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
-const cors = require("cors") // Import the cors middleware
+const cors = require("cors")
 
 const PORT = 3009
 const URI = "mongodb://127.0.0.1:27017/trippin"
