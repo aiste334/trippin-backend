@@ -30,9 +30,10 @@ app.post("/destinations", async (req, res) => {
 
 app.put("/destinations/:id", async (req, res) => {
   try {
-    const destination = await Destination.findOneAndUpdate(
-      { _id: req.params.id },
-      { ...req.body }
+    const destination = await Destination.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
     )
     res.status(200).send(JSON.stringify(destination))
   } catch (err) {
@@ -42,7 +43,7 @@ app.put("/destinations/:id", async (req, res) => {
 
 app.delete("/destinations/:id", async (req, res) => {
   try {
-    await Destination.deleteOne({ _id: destinationId })
+    await Destination.deleteById(req.params.id)
     res.status(204).send("Deleted successfully")
   } catch (err) {
     res.status(500).send("Failed to delete destination")
