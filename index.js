@@ -13,18 +13,18 @@ app.use(bodyParser.json())
 app.use(cors())
 
 app.get("/destinations", async (req, res) => {
-  const destinations = await Destination.find({}).lean()
-
-  res.status(200).send(JSON.stringify(destinations))
+  try {
+    const destinations = await Destination.find({}).lean()
+    res.status(200).json(destinations)
+  } catch (err) {}
 })
 
 app.post("/destinations", async (req, res) => {
   try {
     const destination = await Destination.create(req.body)
-    res.status(201).send(JSON.stringify(destination))
+    res.status(201).json(destination)
   } catch (err) {
-    console.log(err)
-    res.status(500).send("Failed to create destination")
+    res.status(500).json({ message: "Failed to create destination" })
   }
 })
 
@@ -35,18 +35,19 @@ app.put("/destinations/:id", async (req, res) => {
       req.body,
       { new: true }
     )
-    res.status(200).send(JSON.stringify(destination))
+    if (!destination) res.status(404).json({ message: "Destination not found" })
+    res.status(200).json(destination)
   } catch (err) {
-    res.status(500).send("Failed to update destination")
+    res.status(500).json({ message: "Failed to update destination" })
   }
 })
 
 app.delete("/destinations/:id", async (req, res) => {
   try {
-    await Destination.deleteById(req.params.id)
-    res.status(204).send("Deleted successfully")
+    await Destination.deleteOne({ _id: req.params.id })
+    res.status(204).json({ message: "Deleted successfully" })
   } catch (err) {
-    res.status(500).send("Failed to delete destination")
+    res.status(500).json({ message: "Failed to delete destination" })
   }
 })
 
