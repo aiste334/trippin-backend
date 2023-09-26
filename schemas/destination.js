@@ -22,6 +22,4 @@ const DestinationSchema = new mongoose.Schema({
   },
 })
 
-const Destination = mongoose.model("destinations", DestinationSchema)
-
-export default Destination
+module.exports = mongoose.model("destinations", DestinationSchema)
