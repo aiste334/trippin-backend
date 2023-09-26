@@ -21,10 +21,22 @@ app.get("/destinations", async (req, res) => {
 app.post("/destinations", async (req, res) => {
   try {
     const destination = await Destination.create(req.body)
-    res.status(201).send(destination)
+    res.status(201).send(JSON.stringify(destination))
   } catch (err) {
     console.log(err)
     res.status(500).send("Failed to create destination")
+  }
+})
+
+app.put("/destinations/:id", async (req, res) => {
+  try {
+    const destination = await Destination.findOneAndUpdate(
+      { _id: req.params.id },
+      { ...req.body }
+    )
+    res.status(200).send(JSON.stringify(destination))
+  } catch (err) {
+    res.status(500).send("Failed to update destination")
   }
 })
 
