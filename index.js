@@ -1,12 +1,13 @@
 const Destination = require("./schemas/destination")
 const User = require("./schemas/user")
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { SECRET = "secret" } = process.env;
 const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
 const cors = require("cors")
+const auth = require("./auth.js")
 
 const PORT = 3009
 const URI = "mongodb://127.0.0.1:27017/trippin"
@@ -48,7 +49,7 @@ app.put("/destinations/:id", async (req, res) => {
   }
 })
 
-app.delete("/destinations/:id", async (req, res) => {
+app.delete("/destinations/:id", auth.checkLogin, async (req, res) => {
   try {
     await Destination.deleteOne({ _id: req.params.id })
     res.status(204).json({ message: "Deleted successfully" })
@@ -58,46 +59,37 @@ app.delete("/destinations/:id", async (req, res) => {
 })
 
 
-//Authentication
-
-verifyToken = (req, res, next) => {
-  let token = req.headers["x-access-token"];
-
-  if (!token) {
-    return res.status(403).send({ message: "No token provided!" });
-  }
-
-  jwt.verify(token,
-            config.secret,
-            (err, decoded) => {
-              if (err) {
-                return res.status(401).send({
-                  message: "Unauthorized!",
-                });
-              }
-              req.userId = decoded.id;
-              next();
-            });
-};
+app.get("/user", async (req, res) => {
+  try {
+    const user = await User.findOne({username: req.body.username})
+    res.status(200).json(user)
+  } catch (err) {}
+})
 
 // Authentication controllers
+
 //sign up
-app.post("/user", async (req, res) => {
+app.post("/register", async (req, res) => {
   const existingUser = await User.findOne({
     username: req.body.username
   })
   if(existingUser == null){
     try {
-      //checkDuplicateUsername(req, res);
       req.body.password = await bcrypt.hash(req.body.password, 10);
       const user = await User.create(req.body)
+      console.log("eeee")
       res.status(201).json(user)
     } catch (err) {
+      console.log(err)
       res.status(500).json({ message: `Failed to create user: ${err}` })
     }
   } else {
+    
+  console.log("aaaa")
     res.status(400).send({ message: "Failed! Username is already in use!" });
   }
+  
+  console.log("dddd")
 })
 
 //login
@@ -106,12 +98,24 @@ app.post("/login", async (req, res) => {
     // check if the user exists
     const user = await User.findOne({username: req.body.username})
     if (user) {
+      console.log("user found")
       //check if password matches
       const result = await bcrypt.compare(req.body.password, user.password);
       if (result) {
-        // sign token and send it in response
-        const token = await jwt.sign({ username: user.username }, SECRET);
-        res.json({ token });
+        console.log("password is correct")
+      //Create token
+      const token = jwt.sign(
+      { user_id: user._id },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+      );
+
+      //Save user token
+      user.token = token;
+      console.log(token);
+        res.status(201).json({ token });
       } else {
         res.status(400).json({ error: "password doesn't match" });
       }
@@ -123,7 +127,6 @@ app.post("/login", async (req, res) => {
     res.status(400).json({ error});
   }
 });
-
 
 app.listen(PORT, () => {
   mongoose.set("strictQuery", true)
