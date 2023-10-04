@@ -30,9 +30,10 @@ app.post("/destinations", async (req, res) => {
   }
 })
 
-app.get("/destination/:id", async (req, res) => {
+app.get("/destinations/:id", async (req, res) => {
   try {
     const destinationId = req.params.id;
+    console.log("Received request for destination ID:", destinationId);
     const destination = await Destination.findById(destinationId).lean();
 
     if (!destination) {
@@ -45,8 +46,6 @@ app.get("/destination/:id", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 app.put("/destinations/:id", async (req, res) => {
     try {
