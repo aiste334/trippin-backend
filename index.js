@@ -11,6 +11,8 @@ const URI = "mongodb://127.0.0.1:27017/trippin"
 const app = express()
 app.use(bodyParser.json())
 app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true })); 
+
 
 app.get("/destinations", async (req, res) => {
   try {
@@ -28,19 +30,37 @@ app.post("/destinations", async (req, res) => {
   }
 })
 
-app.put("/destinations/:id", async (req, res) => {
+app.get("/destinations/:id", async (req, res) => {
   try {
-    const destination = await Destination.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    )
-    if (!destination) res.status(404).json({ message: "Destination not found" })
-    res.status(200).json(destination)
-  } catch (err) {
-    res.status(500).json({ message: "Failed to update destination" })
+    const destinationId = req.params.id;
+    console.log("Received request for destination ID:", destinationId);
+    const destination = await Destination.findById(destinationId).lean();
+
+    if (!destination) {
+      res.status(404).send("Destination not found");
+    } else {
+      res.status(200).json(destination);
+    }
+  } catch (error) {
+    console.error("Error fetching destination:", error);
+    res.status(500).send("Internal Server Error");
   }
-})
+});
+
+app.put("/destinations/:id", async (req, res) => {
+    try {
+        const destination = await Destination.findOneAndUpdate(
+            { _id: req.params.id },
+            { $set: req.body }, 
+            { new: true } 
+        );
+        res.status(200).send(JSON.stringify(destination));
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Failed to update destination");
+    }
+});
+
 
 app.delete("/destinations/:id", async (req, res) => {
   try {
