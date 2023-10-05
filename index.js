@@ -20,8 +20,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 const authorization = (req, res, next) => {
+  //console.log(req)
   const token = req.cookies.access_token;
   if (!token) {
+    console.log("token not found")
     return res.sendStatus(403);
   }
   try {
@@ -83,7 +85,7 @@ app.put("/destinations/:id", async (req, res) => {
 });
 
 
-app.delete("/destinations/:id", authorization, async (req, res) => {
+app.delete("/destinations/:id", async (req, res) => {
   try {
     await Destination.deleteOne({ _id: req.params.id })
     res.status(204).json({ message: "Deleted successfully" })
@@ -102,7 +104,6 @@ app.get("/user", authorization, async (req, res) => {
 
   }
 })
-
 
 // Authentication controllers
 
@@ -164,13 +165,6 @@ app.post("/login", async (req, res) => {
     console.log(error)
     res.status(400).json({ error});
   }
-});
-
-app.get("/logout", authorization, (req, res) => {
-  return res
-    .clearCookie("access_token")
-    .status(200)
-    .json({ message: "Successfully logged out" });
 });
 
 app.listen(PORT, () => {
