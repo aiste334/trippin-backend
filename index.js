@@ -64,9 +64,10 @@ app.put("/destinations/:id", async (req, res) => {
 
 app.delete("/destinations/:id", async (req, res) => {
   try {
-    await Destination.deleteOne({ _id: destinationId })
+    await Destination.deleteOne({ _id: req.params.id})
     res.status(204).send("Deleted successfully")
   } catch (err) {
+    console.error(err);
     res.status(500).send("Failed to delete destination")
   }
 })
