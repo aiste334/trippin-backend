@@ -10,7 +10,7 @@ const mongoose = require("mongoose")
 const cors = require("cors")
 
 const PORT = 3009
-const URI = "mongodb://127.0.0.1:27017/trippin"
+const URI = process.env.MONGO_URI
 
 const app = express()
 app.use(bodyParser.json())
